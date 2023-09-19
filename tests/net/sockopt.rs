@@ -161,13 +161,12 @@ fn test_sockopts_ipv4() {
 
     #[cfg(not(any(target_os = "openbsd", target_os = "haiku", target_os = "nto")))]
     {
-        // Set keepalive values:
-        rustix::net::sockopt::set_tcp_keepcnt(&s, 42).unwrap();
+        // Set keepalive values. On illumos the order in which these are set matters! 
         rustix::net::sockopt::set_tcp_keepidle(&s, Duration::from_secs(3601)).unwrap();
         rustix::net::sockopt::set_tcp_keepintvl(&s, Duration::from_secs(61)).unwrap();
+        rustix::net::sockopt::set_tcp_keepcnt(&s, 42).unwrap();
 
         // Check keepalive values:
-        assert_eq!(rustix::net::sockopt::get_tcp_keepcnt(&s).unwrap(), 42);
         assert_eq!(
             rustix::net::sockopt::get_tcp_keepidle(&s).unwrap(),
             Duration::from_secs(3601)
@@ -176,6 +175,7 @@ fn test_sockopts_ipv4() {
             rustix::net::sockopt::get_tcp_keepintvl(&s).unwrap(),
             Duration::from_secs(61)
         );
+        assert_eq!(rustix::net::sockopt::get_tcp_keepcnt(&s).unwrap(), 42);
     }
 
     // Set the receive buffer size.
